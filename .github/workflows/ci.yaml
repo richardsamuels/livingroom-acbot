@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Create secrets.yaml
         run: |
-          echo "key: test1" >> secrets.yaml
+          echo "key: DBmHPlWJweXT3GnjlcK+efUB4taZgOGx8w1XDm3NABc=" >> secrets.yaml
           echo "password: test2" >> secrets.yaml
           cat << EOF >> secrets.yaml
           wifi:
