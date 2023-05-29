@@ -1,5 +1,7 @@
 esphome:
   name: livingroom-acbot
+  platformio_options:
+    board_build.flash_mode: dio
   on_boot:
     priority: 600
     then:
@@ -9,17 +11,18 @@ esphome:
       - servo.write:
           id: power
           level: 0
-      - output.set_level:
-          id: dac_output
-          level: 50%
 
 preferences:
   flash_write_interval: 70s
 
 esp32:
-  board: esp32dev
+  #board: esp32dev
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
   framework:
     type: esp-idf
+    sdkconfig_options:
+      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
 
 # Enable logging
 logger:
@@ -43,15 +46,46 @@ servo:
 output:
   - platform: ledc
     id: power_servo_output
-    pin: 12
+    pin: 18
     frequency: 50Hz
   - platform: ledc
     id: updown_servo_output
-    pin: 13
+    pin: 42
     frequency: 50Hz
-  - platform: esp32_dac
-    pin: 25
-    id: dac_output
+
+  - platform: ledc
+    id: d0
+    pin: GPIO48
+    frequency: 50Hz
+  - platform: ledc
+    id: d1
+    pin: GPIO41
+    frequency: 50Hz
+  - platform: ledc
+    id: d2
+    pin: GPIO38
+    frequency: 50Hz
+  - platform: ledc
+    id: d3
+    pin: GPIO12
+    frequency: 50Hz
+  - platform: ledc
+    id: d4
+    pin: GPIO11
+    frequency: 50Hz
+  - platform: ledc
+    id: d5
+    pin: GPIO10
+    frequency: 50Hz
+
+sensor:
+  - platform: adc
+    internal: true
+    id: livingroom_ac_screen_lightval
+    pin: 6
+    name: AC Screen Photoresistor
+    update_interval: 1s
+    attenuation: auto
 
 number:
   - platform: template
@@ -135,15 +169,6 @@ switch:
       - button.press: living_room_ac_power_toggle
     turn_off_action:
       - button.press: living_room_ac_power_toggle
-
-sensor:
-  - platform: adc
-    internal: true
-    id: livingroom_ac_screen_lightval
-    pin: 32
-    name: AC Screen Photoresistor
-    update_interval: 1s
-    attenuation: auto
 
 bluetooth_proxy:
   active: true
