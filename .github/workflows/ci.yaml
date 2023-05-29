@@ -17,16 +17,16 @@ jobs:
       - name: Create secrets.yaml
         run: |
           echo "key: DBmHPlWJweXT3GnjlcK+efUB4taZgOGx8w1XDm3NABc=" >> secrets.yaml
-          echo "password: test2" >> secrets.yaml
+          echo "password: test2~~!!!~~test2" >> secrets.yaml
           cat << EOF >> secrets.yaml
           wifi:
             ssid: "test4"
-            password: "test5"
+            password: "test5test5test5"
 
             # Enable fallback hotspot (captive portal) in case wifi connection fails
             ap:
               ssid: "test6"
-              password: "test7"
+              password: "test7test7test7"
           EOF
         shell: bash
       - name: Build ESPHome firmware to verify configuration
