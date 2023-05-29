@@ -1,0 +1,149 @@
+esphome:
+  name: livingroom-acbot
+  on_boot:
+    priority: 600
+    then:
+      - servo.write:
+          id: updown
+          level: 0
+      - servo.write:
+          id: power
+          level: 0
+      - output.set_level:
+          id: dac_output
+          level: 25%
+
+preferences:
+  flash_write_interval: 70s
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret key
+
+ota:
+  password: !secret password
+
+wifi: !secret wifi
+
+servo:
+  - id: power
+    output: power_servo_output
+  - id: updown
+    output: updown_servo_output
+
+output:
+  - platform: ledc
+    id: power_servo_output
+    pin: 12
+    frequency: 50Hz
+  - platform: ledc
+    id: updown_servo_output
+    pin: 13
+    frequency: 50Hz
+  - platform: esp32_dac
+    pin: 25
+    id: dac_output
+
+number:
+  - platform: template
+    internal: true
+    name: AC Up/Down Servo
+    min_value: -100
+    initial_value: 0
+    max_value: 100
+    step: 1
+    optimistic: true
+    set_action:
+      then:
+        - servo.write:
+            id: updown
+            level: !lambda 'return x / 100.0;'
+  - platform: template
+    internal: true
+    name: AC Power Servo
+    min_value: -100
+    initial_value: 0
+    max_value: 100
+    step: 1
+    optimistic: true
+    set_action:
+      then:
+        - servo.write:
+            id: power
+            level: !lambda 'return x / 100.0;'
+
+button:
+  - platform: template
+    name: Living Room AC
+    id: living_room_ac_power_toggle
+    internal: true
+    on_press:
+      - servo.write:
+          id: power
+          level: 0.50
+      - delay: 250ms
+      - servo.write:
+          id: power
+          level: 0.0
+      - delay: 250ms
+  - platform: template
+    name: Living Room AC Down
+    id: living_room_ac_temp_down
+    on_press:
+      - servo.write:
+          id: updown
+          level: 0.20
+      - delay: 250ms
+      - servo.write:
+          id: updown
+          level: 0.0
+      - delay: 250ms
+  - platform: template
+    name: Living Room AC Up
+    id: living_room_ac_temp_up
+    on_press:
+      - servo.write:
+          id: updown
+          level: -0.45
+      - delay: 250ms
+      - servo.write:
+          id: updown
+          level: 0.0
+      - delay: 250ms
+
+switch:
+  - platform: template
+    id: living_room_ac
+    icon: 'mdi:air-conditioner'
+    name: "AC"
+    lambda: |-
+      if (id(livingroom_ac_screen_lightval).state >= 0.81 && id(livingroom_ac_screen_lightval).state < 0.95) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - button.press: living_room_ac_power_toggle
+    turn_off_action:
+      - button.press: living_room_ac_power_toggle
+
+sensor:
+  - platform: adc
+    internal: true
+    id: livingroom_ac_screen_lightval
+    pin: 32
+    name: AC Screen Photoresistor
+    update_interval: 1s
+    attenuation: auto
+
+bluetooth_proxy:
+  active: true
