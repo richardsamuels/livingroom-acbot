@@ -14,6 +14,22 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
+      - name: Create secrets.yaml
+        run: |
+          echo "wifi: test1" >> secrets.yaml
+          echo "key: test2" >> secrets.yaml
+          echo "password: test3" >> secrets.yaml
+          cat << EOF >> secrets.yaml
+          wifi:
+            ssid: "test4"
+            password: "test5"
+
+            # Enable fallback hotspot (captive portal) in case wifi connection fails
+            ap:
+              ssid: "test6"
+              password: "test7"
+          EOF
+        shell: bash
       - name: Build ESPHome firmware to verify configuration
         uses: esphome/build-action@v1.5.0
         with:
