@@ -11,7 +11,7 @@ esphome:
           level: 0
       - output.set_level:
           id: dac_output
-          level: 25%
+          level: 50%
 
 preferences:
   flash_write_interval: 70s
@@ -126,7 +126,7 @@ switch:
     icon: 'mdi:air-conditioner'
     name: "AC"
     lambda: |-
-      if (id(livingroom_ac_screen_lightval).state >= 0.81 && id(livingroom_ac_screen_lightval).state < 0.95) {
+      if (id(livingroom_ac_screen_lightval).state > 0.08) {
         return true;
       } else {
         return false;
