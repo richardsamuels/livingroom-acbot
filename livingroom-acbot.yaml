@@ -16,13 +16,13 @@ preferences:
   flash_write_interval: 70s
 
 esp32:
-  #board: esp32dev
-  board: esp32-s3-devkitc-1
-  variant: esp32s3
+  board: esp32dev
+  variant: esp32c3
   framework:
+    #type: arduino
+    #version: 2.0.3
+    #platform_version: 5.1.0
     type: esp-idf
-    sdkconfig_options:
-      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
 
 # Enable logging
 logger:
@@ -46,43 +46,31 @@ servo:
 output:
   - platform: ledc
     id: power_servo_output
-    pin: 18
+    pin: GPIO6
     frequency: 50Hz
   - platform: ledc
     id: updown_servo_output
-    pin: 42
+    pin: GPIO7
     frequency: 50Hz
 
-  - platform: ledc
-    id: d0
-    pin: GPIO48
-    frequency: 50Hz
-  - platform: ledc
-    id: d1
-    pin: GPIO41
-    frequency: 50Hz
-  - platform: ledc
-    id: d2
-    pin: GPIO38
-    frequency: 50Hz
-  - platform: ledc
-    id: d3
-    pin: GPIO12
-    frequency: 50Hz
-  - platform: ledc
-    id: d4
-    pin: GPIO11
-    frequency: 50Hz
-  - platform: ledc
-    id: d5
-    pin: GPIO10
-    frequency: 50Hz
+      #- platform: ledc
+      #  id: d0
+      #  pin: GPIO17
+      #  frequency: 50Hz
+      #- platform: ledc
+      #  id: d1
+      #  pin: GPIO16
+      #  frequency: 50Hz
+      #- platform: ledc
+      #  id: d2
+      #  pin: GPIO15
+      #  frequency: 50Hz
 
 sensor:
   - platform: adc
     internal: true
     id: livingroom_ac_screen_lightval
-    pin: 6
+    pin: 4
     name: AC Screen Photoresistor
     update_interval: 1s
     attenuation: auto
