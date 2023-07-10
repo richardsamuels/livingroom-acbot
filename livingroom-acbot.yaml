@@ -1,7 +1,9 @@
 esphome:
-  name: livingroom-acbot
+  name: livingroom-acbot2
   platformio_options:
     board_build.flash_mode: dio
+    platform_packages:
+      - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
   on_boot:
     priority: 600
     then:
@@ -16,16 +18,18 @@ preferences:
   flash_write_interval: 70s
 
 esp32:
-  board: esp32dev
+  board: esp32-c3-devkitm-1
   variant: esp32c3
   framework:
     #type: arduino
-    #version: 2.0.3
-    #platform_version: 5.1.0
+    version: 6.3.2
     type: esp-idf
+    sdkconfig_options:
+      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
 
 # Enable logging
 logger:
+  baud_rate: 9600
 
 # Enable Home Assistant API
 api:
@@ -53,18 +57,18 @@ output:
     pin: GPIO7
     frequency: 50Hz
 
-      #- platform: ledc
-      #  id: d0
-      #  pin: GPIO17
-      #  frequency: 50Hz
-      #- platform: ledc
-      #  id: d1
-      #  pin: GPIO16
-      #  frequency: 50Hz
-      #- platform: ledc
-      #  id: d2
-      #  pin: GPIO15
-      #  frequency: 50Hz
+  - platform: ledc
+    id: d0
+    pin: GPIO5
+    frequency: 50Hz
+  - platform: ledc
+    id: d1
+    pin: GPIO4
+    frequency: 50Hz
+  - platform: ledc
+    id: d2
+    pin: GPIO10
+    frequency: 50Hz
 
 sensor:
   - platform: adc
@@ -158,5 +162,5 @@ switch:
     turn_off_action:
       - button.press: living_room_ac_power_toggle
 
-bluetooth_proxy:
-  active: true
+        #bluetooth_proxy:
+        #  active: true
