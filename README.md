@@ -5,13 +5,14 @@ A small ESPHome-based robot to integrate my old window AC into Home Assistant
 
 ## BOM
 
-BOM does not include parts on custom PCB. See [PCB/jlcpcb/production_files/BOM-esp.csv]
+BOM does not include parts on custom PCB. See the [PCB BOM](PCB/jlcpcb/production_files/BOM-esp.csv) for that.
 
-| Part | Quantity |
-| [Photoresistor](https://www.amazon.com/gp/product/B01N7V536K) | 1
-| SG90 Servo | 2 |
-| M2.5x6 SHCS | 4 |
-| M2x10 tapping screws | 5 |
+| Part                                                          | Quantity |
+| ------------------------------------------------------------- | -------- |
+| [Photoresistor](https://www.amazon.com/gp/product/B01N7V536K) | 1        |
+| SG90 Servo                                                    | 2        |
+| M2.5x6 SHCS                                                   | 4        |
+| M2x10 tapping screws                                          | 5        |
 
 ## Custom PCB
 
