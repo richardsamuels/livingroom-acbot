@@ -20,6 +20,7 @@ A custom PCB can be found in PCB. The expected servo pinout is (Control, 5V, GND
 where Control is indicated on the silkscreen with a colored in pin.
 
 ## 3D Printed Parts
+![Half-assed 3d model](Images/fusion.png)
 
 1. Attach power-pusher.stl to the servo horn (arm) on the left servo using self-tapping screws
 2. Attach updown-pusher.stl to the servo horn (half circle) on the right servo using self-tapping screws
