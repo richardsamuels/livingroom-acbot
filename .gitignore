@@ -1,2 +1,5 @@
 secrets.yaml
-.esphome
+.esphome/
+venv
+~*.lck
+PCB/esp-backups/

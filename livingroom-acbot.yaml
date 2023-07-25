@@ -1,5 +1,11 @@
 esphome:
-  name: livingroom-acbot
+  name: livingroom-acbot3
+  platformio_options:
+    board_build.flash_mode: dio
+    platform_packages:
+      - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+    board_build.f_flash: 40000000L
+    board_build.flash_size: 4MB
   on_boot:
     priority: 600
     then:
@@ -9,30 +15,27 @@ esphome:
       - servo.write:
           id: power
           level: 0
-      - output.set_level:
-          id: dac_output
-          level: 50%
 
 preferences:
   flash_write_interval: 70s
 
 esp32:
-  board: esp32dev
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
   framework:
+    #type: arduino
     type: esp-idf
+    sdkconfig_options:
+      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
 
 # Enable logging
 logger:
+  #level: VERY_VERBOSE
+  logs:
+    esp-idf: ERROR
 
-# Enable Home Assistant API
-api:
-  encryption:
-    key: !secret key
-
-ota:
-  password: !secret password
-
-wifi: !secret wifi
+<<: !include "secrets.yaml"
 
 servo:
   - id: power
@@ -43,15 +46,34 @@ servo:
 output:
   - platform: ledc
     id: power_servo_output
-    pin: 12
+    pin: GPIO6
     frequency: 50Hz
   - platform: ledc
     id: updown_servo_output
-    pin: 13
+    pin: GPIO7
     frequency: 50Hz
-  - platform: esp32_dac
-    pin: 25
-    id: dac_output
+
+  - platform: ledc
+    id: d0
+    pin: GPIO5
+    frequency: 50Hz
+  - platform: ledc
+    id: d1
+    pin: GPIO4
+    frequency: 50Hz
+  - platform: ledc
+    id: d2
+    pin: GPIO10
+    frequency: 50Hz
+
+sensor:
+  - platform: adc
+    internal: true
+    id: livingroom_ac_screen_lightval
+    pin: 4
+    name: AC Screen Photoresistor
+    update_interval: 1s
+    attenuation: auto
 
 number:
   - platform: template
@@ -136,14 +158,5 @@ switch:
     turn_off_action:
       - button.press: living_room_ac_power_toggle
 
-sensor:
-  - platform: adc
-    internal: true
-    id: livingroom_ac_screen_lightval
-    pin: 32
-    name: AC Screen Photoresistor
-    update_interval: 1s
-    attenuation: auto
-
-bluetooth_proxy:
-  active: true
+        #bluetooth_proxy:
+        #  active: true
