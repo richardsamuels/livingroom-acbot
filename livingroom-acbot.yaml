@@ -1,9 +1,11 @@
 esphome:
-  name: livingroom-acbot2
+  name: livingroom-acbot3
   platformio_options:
     board_build.flash_mode: dio
     platform_packages:
       - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+    board_build.f_flash: 40000000L
+    board_build.flash_size: 4MB
   on_boot:
     priority: 600
     then:
@@ -22,24 +24,18 @@ esp32:
   variant: esp32c3
   framework:
     #type: arduino
-    version: 6.3.2
     type: esp-idf
     sdkconfig_options:
       CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
 
 # Enable logging
 logger:
-  baud_rate: 9600
+  #level: VERY_VERBOSE
+  logs:
+    esp-idf: ERROR
 
-# Enable Home Assistant API
-api:
-  encryption:
-    key: !secret key
-
-ota:
-  password: !secret password
-
-wifi: !secret wifi
+<<: !include "secrets.yaml"
 
 servo:
   - id: power
