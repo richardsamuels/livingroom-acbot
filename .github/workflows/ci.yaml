@@ -33,6 +33,6 @@ jobs:
           EOF
         shell: bash
       - name: Build ESPHome firmware to verify configuration
-        uses: esphome/build-action@v1.5.0
+        uses: esphome/build-action@v1.8.0
         with:
           yaml_file: ${{ matrix.file }}
