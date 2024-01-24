@@ -1,20 +1,31 @@
 esphome:
   name: livingroom-acbot3
+  includes:
+    - helpers.hpp
   platformio_options:
     board_build.flash_mode: dio
-    platform_packages:
-      - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
     board_build.f_flash: 40000000L
     board_build.flash_size: 4MB
   on_boot:
-    priority: 600
-    then:
-      - servo.write:
-          id: updown
-          level: 0
-      - servo.write:
-          id: power
-          level: 0
+    # reset servo positions on boot
+    - priority: 600
+      then:
+        - servo.write:
+            id: mode_select
+            level: 0
+        - servo.write:
+            id: power
+            level: 0
+    # work around for esphome issue #3688
+    # https://github.com/esphome/issues/issues/3668#issuecomment-1493423796
+    - priority: 500
+      then:
+        - esp32_ble_tracker.stop_scan:
+    - priority: 100
+      then:
+        - delay: 10s
+        - esp32_ble_tracker.start_scan:
+            continuous: true
 
 preferences:
   flash_write_interval: 70s
@@ -23,13 +34,11 @@ esp32:
   board: esp32-c3-devkitm-1
   variant: esp32c3
   framework:
-    #type: arduino
     type: esp-idf
-    sdkconfig_options:
-      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
-      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
+      #sdkconfig_options:
+      #  CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      #  CONFIG_COMPILER_OPTIMIZATION_SIZE: y
 
-# Enable logging
 logger:
   #level: VERY_VERBOSE
   logs:
@@ -40,8 +49,8 @@ logger:
 servo:
   - id: power
     output: power_servo_output
-  - id: updown
-    output: updown_servo_output
+  - id: mode_select
+    output: mode_select_servo_output
 
 output:
   - platform: ledc
@@ -49,7 +58,7 @@ output:
     pin: GPIO6
     frequency: 50Hz
   - platform: ledc
-    id: updown_servo_output
+    id: mode_select_servo_output
     pin: GPIO7
     frequency: 50Hz
 
@@ -67,13 +76,9 @@ output:
     frequency: 50Hz
 
 sensor:
-  - platform: adc
-    internal: true
-    id: livingroom_ac_screen_lightval
-    pin: 4
-    name: AC Screen Photoresistor
-    update_interval: 1s
-    attenuation: auto
+  - platform: homeassistant
+    id: ac_power
+    entity_id: sensor.living_room_ac_power
 
 number:
   - platform: template
@@ -87,7 +92,7 @@ number:
     set_action:
       then:
         - servo.write:
-            id: updown
+            id: mode_select
             level: !lambda 'return x / 100.0;'
   - platform: template
     internal: true
@@ -106,39 +111,84 @@ number:
 button:
   - platform: template
     name: Living Room AC
+    # toggle the AC power button
     id: living_room_ac_power_toggle
     internal: true
     on_press:
       - servo.write:
           id: power
-          level: 0.50
+          level: 0.45
       - delay: 250ms
       - servo.write:
           id: power
           level: 0.0
       - delay: 250ms
+  # XXX: If living_room_ac_mode is called multiple times, the servo actions will
+  # not batch, but will instead clobber one another. These seemingly duplicate
+  # functions are a workaround for this issue when it is necessary to call
+  # living_room_ac_mode multiple times in row.
   - platform: template
-    name: Living Room AC Down
-    id: living_room_ac_temp_down
+    # toggle the AC mode button
+    name: Living Room AC Mode
+    id: living_room_ac_mode
+    internal: true
     on_press:
       - servo.write:
-          id: updown
-          level: 0.20
+          id: mode_select
+          level: 0.40
       - delay: 250ms
       - servo.write:
-          id: updown
+          id: mode_select
           level: 0.0
       - delay: 250ms
   - platform: template
-    name: Living Room AC Up
-    id: living_room_ac_temp_up
+    name: Living Room AC Mode 2
+    id: living_room_ac_mode_2
+    internal: true
     on_press:
       - servo.write:
-          id: updown
-          level: -0.45
+          id: mode_select
+          level: 0.40
       - delay: 250ms
       - servo.write:
-          id: updown
+          id: mode_select
+          level: 0.0
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.40
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.0
+      - delay: 250ms
+  - platform: template
+    name: Living Room AC Mode 3
+    id: living_room_ac_mode_3
+    internal: true
+    on_press:
+      - servo.write:
+          id: mode_select
+          level: 0.40
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.0
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.40
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.0
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
+          level: 0.40
+      - delay: 250ms
+      - servo.write:
+          id: mode_select
           level: 0.0
       - delay: 250ms
 
@@ -147,16 +197,72 @@ switch:
     id: living_room_ac
     icon: 'mdi:air-conditioner'
     name: "AC"
-    lambda: |-
-      if (id(livingroom_ac_screen_lightval).state > 0.08) {
-        return true;
-      } else {
-        return false;
-      }
+    lambda: !lambda "return id(ac_power).state >= 50;"
+    restore_mode: RESTORE_DEFAULT_OFF
     turn_on_action:
       - button.press: living_room_ac_power_toggle
     turn_off_action:
       - button.press: living_room_ac_power_toggle
 
-        #bluetooth_proxy:
-        #  active: true
+select:
+  - platform: template
+    name: Living Room AC/Fan Mode
+    id: living_room_ac_fan_mode
+    options:
+     - "AC"
+     - "Energy Saver"
+     - "Fan"
+    initial_option: "AC"
+    optimistic: false
+    restore_value: true
+    set_action:
+      - if:
+          condition:
+            # on/off state determined by watts being consumed by AC.
+            # 50 watts was arbitrarily chosen as a middle-ground between
+            # standby power consumption and fan-only power consumption
+            lambda: 'return id(ac_power).state >= 50;'
+          then:
+            - lambda: |-
+                auto& state = id(living_room_ac_fan_mode).state;
+                const int state_num = state_str_to_enum(state);
+                const int new_state = state_str_to_enum(x);
+
+                auto temp_state = state_num;
+                auto temp_state = state_num;
+                auto distance = 0;
+                while (temp_state != new_state) {
+                  temp_state++;
+                  if(temp_state == 3) {
+                    temp_state = 0;
+                  }
+                  distance++;
+                }
+                ESP_LOGI("living-room-ac", "Set mode from %s to %s; steps %i", id(living_room_ac_fan_mode).state.c_str(), x.c_str(), distance);
+
+                if (distance == 3) {
+                  mode_servo_trigger_3x->trigger();
+                } else if (distance == 2) {
+                  mode_servo_trigger_2x->trigger();
+                } else if (distance == 1) {
+                  mode_servo_trigger_1x->trigger();
+                }
+                id(living_room_ac_fan_mode).publish_state(x);
+                ESP_LOGI("living-room-ac", "Mode is %s", id(living_room_ac_fan_mode).state.c_str());
+
+binary_sensor:
+  - platform: template
+    name: "Livingroom AC Compressor On"
+    lambda: !lambda "return id(ac_power).state >= 150;"
+  - platform: template
+    name: "Livingroom AC On"
+    lambda: !lambda "return id(ac_power).state >= 50;"
+
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+    continuous: true
+
+bluetooth_proxy:
+  active: true
