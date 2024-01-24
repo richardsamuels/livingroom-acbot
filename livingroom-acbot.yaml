@@ -35,9 +35,6 @@ esp32:
   variant: esp32c3
   framework:
     type: esp-idf
-      #sdkconfig_options:
-      #  CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
-      #  CONFIG_COMPILER_OPTIMIZATION_SIZE: y
 
 logger:
   #level: VERY_VERBOSE
@@ -62,38 +59,12 @@ output:
     pin: GPIO7
     frequency: 50Hz
 
-  - platform: ledc
-    id: d0
-    pin: GPIO5
-    frequency: 50Hz
-  - platform: ledc
-    id: d1
-    pin: GPIO4
-    frequency: 50Hz
-  - platform: ledc
-    id: d2
-    pin: GPIO10
-    frequency: 50Hz
-
 sensor:
   - platform: homeassistant
     id: ac_power
     entity_id: sensor.living_room_ac_power
 
 number:
-  - platform: template
-    internal: true
-    name: AC Up/Down Servo
-    min_value: -100
-    initial_value: 0
-    max_value: 100
-    step: 1
-    optimistic: true
-    set_action:
-      then:
-        - servo.write:
-            id: mode_select
-            level: !lambda 'return x / 100.0;'
   - platform: template
     internal: true
     name: AC Power Servo
@@ -228,7 +199,6 @@ select:
                 const int state_num = state_str_to_enum(state);
                 const int new_state = state_str_to_enum(x);
 
-                auto temp_state = state_num;
                 auto temp_state = state_num;
                 auto distance = 0;
                 while (temp_state != new_state) {
