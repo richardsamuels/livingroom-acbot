@@ -5,7 +5,7 @@ An ESPHome-based robot to integrate my GE AEL08LQQ2 window AC into Home Assistan
 ![ACbot installed in place](Images/acbot.jpg)
 
 ## Custom PCB
-![PCB](Images/pcb.png)
+![PCB](Images/pcb.jpg)
 
 A custom PCB can be found in ./PCB. The expected servo pinout is (Control, 5V, GND),
 where Control is indicated on the silkscreen with a solid colored pin.
@@ -29,9 +29,8 @@ be used to purchase a fully assembled PCB from JLCPCB.
 state of the AC, see below for the flaws of this approach
 
 ## 3D Printed Parts
-![3d model](Images/fusion.png)
 
-1. Connect all servos the flashed PCB and apply power via USB-C to zero the
+1. Connect all servos to the flashed PCB and apply power via USB-C to zero the
 servo positions.
 2. To each servo, attach power-pusher.stl to the servo horn with a single arm
 using M2x10 self-tappers. Use the hole farthest from the center, and third from
@@ -41,7 +40,7 @@ plastic.
 4. Using VHB, or similarly strong double-sided sticky tape, attach directly to
 AC's front panel, ensuring alignment with the power, temperature read out, and
 temperature control buttons.
-5. Apply more force to the front panel to ensure the servos will not push
+5. Press the panel down with even more force to ensure the servos will not push
 the printed parts off the front panel.
 
 ## Failed Approaches
@@ -67,7 +66,7 @@ Assistant's thermostat is used.
 2. Design a proper mounting mechanism for the PCB, and a cover for the whole
 unit
 
-# Setup & Flash
+# Setup & Flashing
 ## Setup
 1. `python -m venv venv`
 2. `./venv/bin/activate`
