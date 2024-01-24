@@ -66,3 +66,11 @@ repurposed to allow changing the mode instead.
 Assistant's thermostat is used.
 2. Design a proper mounting mechanism for the PCB, and a cover for the whole
 unit
+
+# Setup & Flash
+## Setup
+1. `python -m venv venv`
+2. `./venv/bin/activate`
+3. `python -m pip install esphome`
+## Flashing
+`esphome run livingroom-acbot.yaml`
